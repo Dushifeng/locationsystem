@@ -14,7 +14,8 @@
   <div>
     <el-table
       :data="displayInfo"
-      style="width: 100%">
+      style="width: 100%"
+      max-height="400px">
       <el-table-column
         prop="apMac"
         label="AP Mac"
@@ -44,6 +45,10 @@
       </el-table-column>
     </el-table>
   </div>
+  <div>
+
+    <el-button @click="confirmWatch">添加监控</el-button>
+  </div>
 </div>
 </template>
 
@@ -59,12 +64,28 @@
                 frequency:[],
                 sec:1,
                 start:false,
-                tid:null
+                tid:null,
+                watchMac:"",
+
             }
         },
         methods:{
             goBack(){
                 console.log("back...")
+            },
+
+            confirmWatch(){
+                this.$prompt('请输入设备Mac', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                }).then(({ value }) => {
+                    //添加card
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '取消输入'
+                    });
+                });
             },
             startStatistics() {
                 var that = this
@@ -83,52 +104,47 @@
                 }
                 that.tid = setInterval(()=>{
                     //执行查询
-                    that.$axios.get('getStatisticsInfo').then(successReslut =>{
-                        let data = successReslut.data
+                    that.$axios.get('getStatisticsInfo',{watchMac: that.watchMac}).then(successReslut =>{
+                        let data = successReslut.data.all
                         that.displayInfo.splice(0,that.displayInfo.length)
                         var setf = new Set()
                         for(var key in data){
-                            console.log(key)
+                            for (var key1 in frequencyNum){
+                                key1 = parseInt(key1)
+                                setf.add(key1)
+                            }
+                        }
+                        for(var key in data){
                             var info = data[key]
                             var dataNum = info['dataNum']
                             var devMap = info['devMap']
                             var frequencyNum = info['frequencyNum']
                             var rssNum = info['rssNum']
                             var uniqueDevMacNum = info['uniqueDevMacNum']
-                            for (var key1 in frequencyNum){
-                                key1 = parseInt(key1)
-                                setf.add(key1)
-                            }
-
-                            that.displayInfo.push({
+                            var it = {
                                 apMac:key,
                                 dataNum:dataNum,
                                 rssNum:rssNum,
                                 uniqueDevMacNum:uniqueDevMacNum,
                                 rssMap:frequencyNum
-                            })
+                            }
+                            for(var i in setf){
+                                if (frequencyNum[i]==undefined||frequencyNum[i]==null){
+                                    it[i] = 0
+                                }else {
+                                    it[i] = frequencyNum[i]
+                                }
+                            }
+                            console.log(it)
+                            that.displayInfo.push(it)
                         }
                         that.frequency.slice(0,that.frequency.length)
                         for (var item in setf){
                             that.frequency.push({
                                 label:item+"",
-                                prop:item+"f"
+                                prop:item+""
                             })
                         }
-
-                        // for (var info in that.displayInfo){
-                        //     for (var item in setf){
-                        //         let m = info['rssMap']
-                        //         if (m[item]==undefined||m[item]==null){
-                        //             info[item+"f"]=0
-                        //         }
-                        //         else {
-                        //             info[item+"f"]=m[item]
-                        //         }
-                        //     }
-                        // }
-
-
 
                     }).catch(error=>{
                         that.$message.error(error)
