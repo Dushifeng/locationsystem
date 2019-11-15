@@ -41,6 +41,13 @@ public class DataParser {
         return messages;
     }
 
+    public static String getAPMacFromRawData(String rawData){
+        if (rawData == null||rawData.length()<58){
+            return null;
+        }
+        return rawData.substring(46,58);
+    }
+
     public static List<Message> messageFilter(MessageConfig messageConfig, APConfig apConfig, List<Message> messageList) {
         List<Message> ans = new ArrayList<>();
         for (Message message:messageList){

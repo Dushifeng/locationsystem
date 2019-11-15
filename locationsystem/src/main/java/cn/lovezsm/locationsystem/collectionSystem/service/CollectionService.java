@@ -5,6 +5,8 @@ import cn.lovezsm.locationsystem.base.bean.GridMap;
 import cn.lovezsm.locationsystem.base.config.APConfig;
 import cn.lovezsm.locationsystem.base.data.CollectionInfoCache;
 import cn.lovezsm.locationsystem.base.data.CollectionResult;
+import cn.lovezsm.locationsystem.base.service.CollectionPorter;
+import cn.lovezsm.locationsystem.base.service.DataDirectCenter;
 import cn.lovezsm.locationsystem.base.util.BaseUtils;
 import cn.lovezsm.locationsystem.base.util.FileUtils;
 import cn.lovezsm.locationsystem.base.web.bean.Dev;
@@ -28,8 +30,8 @@ public class CollectionService {
     NewTask curNewTask;
     @Autowired
     CollectionInfoCache infoMap;
-
-    public static volatile boolean isCollectionMode = false;
+    @Autowired
+    CollectionPorter collectionPorter;
 
     public NewTask getCurNewTask() {
         return curNewTask;
@@ -93,14 +95,14 @@ public class CollectionService {
             result.setStatus(200);
             result.setMessage("提交成功");
             System.out.println(curNewTask);
-            isCollectionMode = true;
             infoMap.startCollection(curNewTask);
+            DataDirectCenter.register(collectionPorter);
         }
         return result;
     }
     public void stopTask(OutputStream outputStream){
         Result result = new Result();
-        isCollectionMode = false;
+        DataDirectCenter.unregister(collectionPorter.name);
         infoMap.stopCollection();
         //获取in 和 out文件，压缩包返回前端下载
         File inFile = curNewTask.getInFile();
@@ -163,7 +165,7 @@ public class CollectionService {
             result.setMessage("x，y坐标错误");
             return result;
         }
-        if(!infoMap.put(new RegisterBean(mac,uuid,pointIndex,x,y,Instant.now().getEpochSecond()))){
+        if(!infoMap.register(new RegisterBean(mac,uuid,pointIndex,x,y,Instant.now().getEpochSecond()))){
             result.setStatus(100);
             result.setMessage("该设备Mac仍在采集中，无法添加新任务。");
             return result;

@@ -92,9 +92,6 @@ public class CollectionInfoCache {
             CollectionConfig config = task.getConfig();
             APConfig apConfig = config.getApConfig();
             while (true){
-                if (!CollectionService.isCollectionMode){
-                    return;
-                }
                 try {
                     Message message = messageBlockingQueue.take();
                     RegisterBean registerBean = map.get(message.getDevMac());
@@ -119,7 +116,7 @@ public class CollectionInfoCache {
             }
         }
     }
-    public boolean put(RegisterBean bean){
+    public boolean register(RegisterBean bean){
         for (Map.Entry<String, RegisterBean> e:map.entrySet()
              ) {
             RegisterBean value = e.getValue();
@@ -136,9 +133,14 @@ public class CollectionInfoCache {
         System.out.println(bean);
         return true;
     }
+
     public void putAll(List<Message> messages){
         messageBlockingQueue.addAll(messages);
     }
+    public void put(Message messages){
+        messageBlockingQueue.offer(messages);
+    }
+
     public List<RegisterBean> getFinishedTaskList(){
         return finishedList;
     }

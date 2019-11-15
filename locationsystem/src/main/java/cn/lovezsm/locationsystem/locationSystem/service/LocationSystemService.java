@@ -7,6 +7,8 @@ import cn.lovezsm.locationsystem.base.bean.GridMap;
 import cn.lovezsm.locationsystem.base.config.APConfig;
 import cn.lovezsm.locationsystem.base.config.LocationConfig;
 import cn.lovezsm.locationsystem.base.config.MessageConfig;
+import cn.lovezsm.locationsystem.base.service.DataDirectCenter;
+import cn.lovezsm.locationsystem.base.service.LocationPorter;
 import cn.lovezsm.locationsystem.base.util.BaseUtils;
 import cn.lovezsm.locationsystem.base.util.SpringUtils;
 import cn.lovezsm.locationsystem.locationSystem.task.LocationTask;
@@ -31,6 +33,10 @@ public class LocationSystemService {
     @Autowired
     @Qualifier("Scheduler")
     private Scheduler scheduler;
+
+    @Autowired
+    private LocationPorter porter;
+
     public void startUDPServer(int port){
         UDPServer server = NettyUDPServer.getINSTANCE();
         server.start();
@@ -120,6 +126,9 @@ public class LocationSystemService {
     }
 
     public boolean startLocation(){
+
+        DataDirectCenter.register(porter);
+
         LocationConfig config = SpringUtils.getBean(LocationConfig.class);
 
         try {
@@ -138,6 +147,7 @@ public class LocationSystemService {
     }
 
     public void stopLocation(){
+        DataDirectCenter.unregister(porter.name);
         try {
             scheduler.deleteJob(new JobKey("LocationTask"));
         } catch (SchedulerException e) {
