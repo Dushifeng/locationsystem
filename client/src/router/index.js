@@ -7,6 +7,7 @@ import LocationShowPage from "../components/LocationShowPage";
 import LocationConfigPage from "../components/LocationConfigPage";
 import CollectionClient from "../components/CollectionClient";
 import CollectionConfig from "../components/CollectionSysV2";
+import StatisticsInfo from "../components/StatisticsInfo";
 Vue.use(Router)
 
 export default new Router({
@@ -36,6 +37,10 @@ export default new Router({
         {
           path:'/collectionSysV2',
           component:CollectionConfig
+        },
+        {
+          path:'/statisticsInfo',
+          component:StatisticsInfo
         }
 
       ]

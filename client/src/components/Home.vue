@@ -21,9 +21,9 @@
           <el-menu-item index="locationShowPage">定位展示</el-menu-item>
         </el-submenu>
         <el-submenu index="4">
-          <template slot="title" disabled="true">仿真系统</template>
-          <el-menu-item index="simulationConfig" disabled>参数配置</el-menu-item>
-          <el-menu-item index="simulationShowPage" disabled>仿真展示</el-menu-item>
+          <template slot="title" disabled="true">公共工具</template>
+          <el-menu-item index="statisticsInfo">统计信息</el-menu-item>
+          <el-menu-item index="simulationShowPage" disabled>生成晶格文件</el-menu-item>
         </el-submenu>
         </el-menu>
         </el-header>
