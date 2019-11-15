@@ -91,14 +91,14 @@ public class StatisticsService {
             //dev:
             SingleDevWatchInfo watchInfo;
             if (!devWatchInfoMap.containsKey(message.getDevMac())){
-                watchInfo = new SingleDevWatchInfo(message.getDevMac(),apConfig.getAPSize());
+                watchInfo = new SingleDevWatchInfo(message.getDevMac());
                 devWatchInfoMap.put(message.getDevMac(),watchInfo);
             }else {
                 watchInfo = devWatchInfoMap.get(message.getDevMac());
             }
 
             watchInfo.getMessages().add(message);
-            watchInfo.pushRss(apConfig.getAPIndex(message.getApMac()),message.getRssi());
+            watchInfo.pushRss(message.getApMac(),message.getRssi());
         }
         lock.unlock();
     }
@@ -161,9 +161,6 @@ public class StatisticsService {
 
         }
     }
-
-
-
 
     private class CleanUpRunner implements Runnable{
         @Override

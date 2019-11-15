@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -32,10 +34,19 @@ public class BaseController {
     }
 
     @GetMapping("getStatisticsInfo")
-    public Map<String, StatisticsService.Info> getStatisticsInfo(){
+    public Map<String, Object> getStatisticsInfo(List<String> devMacs){
         Map<String, StatisticsService.Info> data = statisticsService.getData();
         System.out.println(data);
-        return data;
+        Map<String,Object> ans = new HashMap<>();
+        ans.put("all",data);
+        for (String mac:devMacs){
+            SingleDevWatchInfo singleDevWatchInfo = statisticsService.getSingleDevWatchInfo(mac);
+            if (singleDevWatchInfo!=null){
+                ans.put(mac,singleDevWatchInfo);
+            }
+        }
+        return ans;
+
     }
 
     @GetMapping("getSingleDevWatchInfo")
