@@ -32,7 +32,7 @@ public class StatisticsService {
 
     }
 
-    public void start(){
+    public void start(int second){
 
         if (future!=null&&!future.isCancelled()){
             future.cancel(false);
@@ -41,7 +41,7 @@ public class StatisticsService {
         DataDirectCenter.register(porter);
 
         CleanUpRunner cleanUpRunner = new CleanUpRunner();
-        future = swapExpiredPool.scheduleWithFixedDelay(cleanUpRunner, 1, 1, TimeUnit.SECONDS);
+        future = swapExpiredPool.scheduleWithFixedDelay(cleanUpRunner, second, second, TimeUnit.SECONDS);
     }
 
     public void stop(){
@@ -86,14 +86,21 @@ public class StatisticsService {
         private Map<String,Integer>  devMap = new ConcurrentHashMap<>();
         private Map<Integer,Integer> frequencyNum = new ConcurrentHashMap<>();
         private AtomicInteger rssNum = new AtomicInteger(0);//rss个数
+
         public void putFrequencyInfo(int frequency){
-            Integer n = frequencyNum.getOrDefault(frequency, 0);
-            frequencyNum.putIfAbsent(frequency,n+1);
+            if (!frequencyNum.containsKey(frequency)){
+                frequencyNum.put(frequency,1);
+            }else {
+                frequencyNum.put(frequency,frequencyNum.get(frequency)+1);
+            }
         }
 
         public void putDevMac(String devMac){
-            Integer n = devMap.getOrDefault(devMac, 0);
-            devMap.putIfAbsent(devMac,n+1);
+            if (!devMap.containsKey(devMac)){
+                devMap.put(devMac,1);
+            }else {
+                devMap.put(devMac,devMap.get(devMac)+1);
+            }
         }
 
         public void dataIncrement(){
@@ -108,10 +115,28 @@ public class StatisticsService {
             return devMap.size();
         }
 
+        public int getDataNum() {
+            return dataNum.get();
+        }
+
+        public int getRssNum() {
+            return rssNum.get();
+        }
+
+        public Map<Integer, Integer> getFrequencyNum() {
+            return frequencyNum;
+        }
+
+        public Map<String, Integer> getDevMap() {
+            return devMap;
+        }
+
         public void cleanUp(){
             dataNum.set(0);
             devMap.clear();
+            rssNum.set(0);
             frequencyNum.clear();
+
         }
     }
 
