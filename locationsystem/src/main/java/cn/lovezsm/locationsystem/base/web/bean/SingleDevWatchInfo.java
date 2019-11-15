@@ -13,14 +13,20 @@ public class SingleDevWatchInfo {
 
     private String devMac;
     private List<Message> messages = new ArrayList<>();
-    private LocationAlgorithm.RSSi rssAvg;
+    private Map<String, LocationAlgorithm.RSSi> rssAvgMap = new HashMap<>();
 
-    public SingleDevWatchInfo(String devMac,int apNum) {
+    public SingleDevWatchInfo(String devMac) {
         this.devMac = devMac;
-        rssAvg = new LocationAlgorithm.RSSi(apNum);
     }
 
-    public void pushRss(int apIndex,float rss){
-        this.rssAvg.put(apIndex,rss);
+    public void pushRss(String apMac,float rss){
+        LocationAlgorithm.RSSi rs;
+        if (rssAvgMap.containsKey(apMac)){
+            rs = rssAvgMap.get(apMac);
+        }else {
+            rs = new LocationAlgorithm.RSSi(1);
+            rssAvgMap.put(apMac,rs);
+        }
+        rs.put(0,rss);
     }
 }

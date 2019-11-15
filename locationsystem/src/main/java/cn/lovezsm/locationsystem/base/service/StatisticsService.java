@@ -37,7 +37,6 @@ public class StatisticsService {
     APConfig apConfig;
 
     public StatisticsService() {
-
     }
 
     public void start(int second){
@@ -85,7 +84,6 @@ public class StatisticsService {
         info.dataIncrement();
         List<Message> messages = DataParser.parseRawData(rawData);
         for (Message message:messages) {
-
             info.putDevMac(message.getDevMac());
             info.putFrequencyInfo(message.getFrequency());
             info.rssNumIncrement();
@@ -111,7 +109,7 @@ public class StatisticsService {
         private Map<Integer,Integer> frequencyNum = new ConcurrentHashMap<>();
         private AtomicInteger rssNum = new AtomicInteger(0);//rss个数
 
-        public void putFrequencyInfo(int frequency){
+        public void putFrequencyInfo(Integer frequency){
             if (!frequencyNum.containsKey(frequency)){
                 frequencyNum.put(frequency,1);
             }else {

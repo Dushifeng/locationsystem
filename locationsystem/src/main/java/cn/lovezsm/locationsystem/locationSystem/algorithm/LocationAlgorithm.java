@@ -106,11 +106,9 @@ public abstract class LocationAlgorithm {
         }
 
         public void put(int index, double val) {
-
             if (rssi[index] == MIN_RSSI_VAL && num[index] == 0) {
                 rssi[index] = 0;
             }
-
             rssi[index] += val;
             num[index]++;
         }

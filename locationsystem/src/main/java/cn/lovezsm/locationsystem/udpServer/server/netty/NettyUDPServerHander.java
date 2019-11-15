@@ -31,7 +31,6 @@ public class NettyUDPServerHander extends SimpleChannelInboundHandler<DatagramPa
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, DatagramPacket datagramPacket) throws Exception {
         String rawData = ByteBufUtil.hexDump(datagramPacket.content());
-
         DataDirectCenter.putData(rawData);
 
 
