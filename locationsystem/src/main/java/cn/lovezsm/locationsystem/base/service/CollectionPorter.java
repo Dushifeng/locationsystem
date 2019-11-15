@@ -3,7 +3,6 @@ package cn.lovezsm.locationsystem.base.service;
 import cn.lovezsm.locationsystem.base.bean.Message;
 import cn.lovezsm.locationsystem.base.data.CollectionInfoCache;
 import cn.lovezsm.locationsystem.base.util.DataParser;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

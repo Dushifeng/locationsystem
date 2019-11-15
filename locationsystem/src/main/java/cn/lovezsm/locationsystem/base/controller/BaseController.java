@@ -1,7 +1,7 @@
 package cn.lovezsm.locationsystem.base.controller;
 
 import cn.lovezsm.locationsystem.base.service.StatisticsService;
-import lombok.extern.slf4j.XSlf4j;
+import cn.lovezsm.locationsystem.base.web.bean.SingleDevWatchInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,6 +36,11 @@ public class BaseController {
         Map<String, StatisticsService.Info> data = statisticsService.getData();
         System.out.println(data);
         return data;
+    }
+
+    @GetMapping("getSingleDevWatchInfo")
+    public SingleDevWatchInfo getSingleDevWatchInfo(String mac){
+        return statisticsService.getSingleDevWatchInfo(mac);
     }
 
     @GetMapping("stopStatistics")

@@ -1,7 +1,10 @@
 package cn.lovezsm.locationsystem.base.service;
 
+import cn.lovezsm.locationsystem.base.bean.AP;
 import cn.lovezsm.locationsystem.base.bean.Message;
+import cn.lovezsm.locationsystem.base.config.APConfig;
 import cn.lovezsm.locationsystem.base.util.DataParser;
+import cn.lovezsm.locationsystem.base.web.bean.SingleDevWatchInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,24 +25,30 @@ public class StatisticsService {
 
     private Map<String,Info> lastSecondInfo = new HashMap<>();
 
+    private Map<String, SingleDevWatchInfo> devWatchInfoMap = new ConcurrentHashMap<>();
+
     private ReentrantLock lock = new ReentrantLock();
 
     private static ScheduledFuture future;
     @Autowired
     private StatisticsPorter porter;
 
+    @Autowired
+    APConfig apConfig;
+
     public StatisticsService() {
 
     }
 
     public void start(int second){
-
         if (future!=null&&!future.isCancelled()){
             future.cancel(false);
         }
-
+        Set<AP> apList = apConfig.getApList();
+        for (AP ap:apList){
+            statisticsInfo.put(ap.getMac(),new Info());
+        }
         DataDirectCenter.register(porter);
-
         CleanUpRunner cleanUpRunner = new CleanUpRunner();
         future = swapExpiredPool.scheduleWithFixedDelay(cleanUpRunner, second, second, TimeUnit.SECONDS);
     }
@@ -50,9 +59,12 @@ public class StatisticsService {
         future=null;
         lastSecondInfo.clear();
         statisticsInfo.clear();
+        devWatchInfoMap.clear();
     }
 
-
+    public SingleDevWatchInfo getSingleDevWatchInfo(String devMac){
+        return devWatchInfoMap.get(devMac);
+    }
 
 
     public Map<String,Info> getData(){
@@ -77,6 +89,18 @@ public class StatisticsService {
             info.putDevMac(message.getDevMac());
             info.putFrequencyInfo(message.getFrequency());
             info.rssNumIncrement();
+
+            //dev:
+            SingleDevWatchInfo watchInfo;
+            if (!devWatchInfoMap.containsKey(message.getDevMac())){
+                watchInfo = new SingleDevWatchInfo(message.getDevMac(),apConfig.getAPSize());
+                devWatchInfoMap.put(message.getDevMac(),watchInfo);
+            }else {
+                watchInfo = devWatchInfoMap.get(message.getDevMac());
+            }
+
+            watchInfo.getMessages().add(message);
+            watchInfo.pushRss(apConfig.getAPIndex(message.getApMac()),message.getRssi());
         }
         lock.unlock();
     }
@@ -148,9 +172,8 @@ public class StatisticsService {
         public void run() {
             lock.lock();
             lastSecondInfo.putAll(statisticsInfo);
-            for(Map.Entry<String,Info> entry:statisticsInfo.entrySet()){
-                entry.getValue().cleanUp();
-            }
+            statisticsInfo.clear();
+            devWatchInfoMap.clear();
             lock.unlock();
         }
     }
