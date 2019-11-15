@@ -7,8 +7,8 @@
       <el-input v-model="sec" placeholder="" :disabled="start"></el-input>
     </el-form-item>
     <el-form-item>
-      <el-button>开始</el-button>
-      <el-button>结束</el-button>
+      <el-button @click="startStatistics">开始</el-button>
+      <el-button @click="stopStatistics">结束</el-button>
     </el-form-item>
   </el-form>
   <div>
@@ -32,21 +32,13 @@
           width="80">
         </el-table-column>
       </el-table-column>
-      <el-table-column label="2.4G">
-        <template v-for="info in frequency2">
+
+      <el-table-column label="频段数目">
+        <template v-for="item in frequency">
           <el-table-column
-            :prop="displayInfo.rssMap[info]",
-            :label="info",
-            width="80" >
-          </el-table-column>
-        </template>
-      </el-table-column>
-      <el-table-column label="5.8G">
-        <template v-for="info in frequency5">
-          <el-table-column
-            :prop="displayInfo.rssMap[info]",
-            :label="info",
-            width="80" >
+            :label="item.label"
+            :prop="item.prop"
+            width="80">
           </el-table-column>
         </template>
       </el-table-column>
@@ -64,8 +56,7 @@
         data(){
             return{
                 displayInfo:[],
-                frequency2:[],
-                frequency5:[],
+                frequency:[],
                 sec:1,
                 start:false,
                 tid:null
@@ -75,35 +66,17 @@
             goBack(){
                 console.log("back...")
             },
-            start() {
+            startStatistics() {
                 var that = this
+                this.start = true
                 var s = parseInt(this.sec)
-                this.$axios.get('startStatistics',{t:s},function () {
-                    that.getInfo()
-                }).catch(e=>{
+                this.$axios.get('startStatistics',{t:s}).catch(e=>{
                     alert(e)
                 })
+                console.log("that.getInfo()")
+                that.getInfo(s)
             },
-            /**
-             * "dataNum": 1,
-             "devMap": {
-            "a057e35e8643": 3,
-            "2c5d34d1340f": 4,
-            "9c2ea1dcd02d": 2,
-            "843a4be5b600": 1,
-            "386ea2661226": 1,
-            "3408bc06a5f2": 2,
-            "40bc60b8cb47": 2
-          },
-                   "frequencyNum": {
-            42: 13,
-            155: 2
-          },
-             "rssNum": 15,
-             "uniqueDevMacNum": 7
-
-             */
-            getInfo(){
+            getInfo(n){
                 var that = this
                 if (that.tid!=null){
                     clearInterval(that.tid)
@@ -112,46 +85,76 @@
                     //执行查询
                     that.$axios.get('getStatisticsInfo').then(successReslut =>{
                         let data = successReslut.data
-                        for(var apMac in data){
-                            var info = data[apMac]
+                        that.displayInfo.splice(0,that.displayInfo.length)
+                        var setf = new Set()
+                        for(var key in data){
+                            console.log(key)
+                            var info = data[key]
                             var dataNum = info['dataNum']
                             var devMap = info['devMap']
                             var frequencyNum = info['frequencyNum']
                             var rssNum = info['rssNum']
                             var uniqueDevMacNum = info['uniqueDevMacNum']
-
-                            for (var f in frequencyNum){
-                                f = parseInt(f)
-                                if (f<42){
-                                    if(that.frequency2.indexOf(f)==-1){
-                                        that.frequency2.push(f)
-                                    }
-                                }else{
-                                    if(that.frequency5.indexOf(f)==-1){
-                                        that.frequency5.push(f)
-                                    }
-                                }
+                            for (var key1 in frequencyNum){
+                                key1 = parseInt(key1)
+                                setf.add(key1)
                             }
+
                             that.displayInfo.push({
-                                apMac:apMac,
+                                apMac:key,
                                 dataNum:dataNum,
                                 rssNum:rssNum,
                                 uniqueDevMacNum:uniqueDevMacNum,
                                 rssMap:frequencyNum
                             })
                         }
+                        that.frequency.slice(0,that.frequency.length)
+                        for (var item in setf){
+                            that.frequency.push({
+                                label:item+"",
+                                prop:item+"f"
+                            })
+                        }
+
+                        // for (var info in that.displayInfo){
+                        //     for (var item in setf){
+                        //         let m = info['rssMap']
+                        //         if (m[item]==undefined||m[item]==null){
+                        //             info[item+"f"]=0
+                        //         }
+                        //         else {
+                        //             info[item+"f"]=m[item]
+                        //         }
+                        //     }
+                        // }
+
+
+
                     }).catch(error=>{
                         that.$message.error(error)
                     })
-                },1000)
+                },n*1000)
             },
 
 
-            stop(){
+            stopStatistics(){
+                var that = this
+                if(this.tid) { //如果定时器还在运行 或者直接关闭，不用判断
+                    clearInterval(this.tid); //关闭
+                }
+                that.$axios.get('stopStatistics').catch(e=>{
+                    alert(e)
+                })
+                this.start = false
 
             }
 
 
+        },
+        beforeDestroy() {
+            if(this.tid) { //如果定时器还在运行 或者直接关闭，不用判断
+                clearInterval(this.tid); //关闭
+            }
         }
     }
 </script>
