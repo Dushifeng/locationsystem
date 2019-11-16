@@ -225,7 +225,7 @@
                 this.$axios({
                     url:this.baseUrl+'finishAllTask',
                     method:'get',
-                    responseType:'blob'
+                    responseType:'blob',
                 }).then(res => {           //定义文件名等相关信息
                     const blob = res.data
                     const reader = new FileReader()

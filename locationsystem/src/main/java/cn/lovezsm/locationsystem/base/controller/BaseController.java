@@ -1,13 +1,13 @@
 package cn.lovezsm.locationsystem.base.controller;
 
 import cn.lovezsm.locationsystem.base.service.StatisticsService;
+import cn.lovezsm.locationsystem.base.util.DataParser;
 import cn.lovezsm.locationsystem.base.web.bean.SingleDevWatchInfo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.PostConstruct;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,7 +25,7 @@ public class BaseController {
 
     @GetMapping("startStatistics")
     public void start(@RequestParam(required = false) Integer t){
-        System.out.println("start......");
+        System.out.println("start......"+t);
         if(t==null){
             t = 1;
         }
@@ -33,20 +33,23 @@ public class BaseController {
         statisticsService.start(t);
     }
 
-    @GetMapping("getStatisticsInfo")
-    public Map<String, Object> getStatisticsInfo(List<String> devMacs){
+    @PostMapping("getStatisticsInfo")
+    public Map<String, Object> getStatisticsInfo(@RequestBody ArrayList<String> devMacs){
+        System.out.println(devMacs);
         Map<String, StatisticsService.Info> data = statisticsService.getData();
-        System.out.println(data);
         Map<String,Object> ans = new HashMap<>();
         ans.put("all",data);
         for (String mac:devMacs){
+            mac = DataParser.parseMac(mac);
+            if (mac==null){
+                continue;
+            }
             SingleDevWatchInfo singleDevWatchInfo = statisticsService.getSingleDevWatchInfo(mac);
             if (singleDevWatchInfo!=null){
                 ans.put(mac,singleDevWatchInfo);
             }
         }
         return ans;
-
     }
 
     @GetMapping("getSingleDevWatchInfo")

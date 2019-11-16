@@ -46,8 +46,19 @@
     </el-table>
   </div>
   <div>
-
     <el-button @click="confirmWatch">添加监控</el-button>
+    <div>
+      <el-row :gutter="10">
+        <template v-for="mac in watchMac">
+          <el-col :span="8">
+            <el-card shadow="always">
+              {{mac}}
+            </el-card>
+          </el-col>
+        </template>
+      </el-row>
+
+    </div>
   </div>
 </div>
 </template>
@@ -65,7 +76,7 @@
                 sec:1,
                 start:false,
                 tid:null,
-                watchMac:"",
+                watchMac:[],
 
             }
         },
@@ -79,11 +90,12 @@
                     confirmButtonText: '确定',
                     cancelButtonText: '取消',
                 }).then(({ value }) => {
+                    this.watchMac.push(value)
                     //添加card
-                }).catch(() => {
+                }).catch((e) => {
                     this.$message({
                         type: 'info',
-                        message: '取消输入'
+                        message: '取消输入'+e
                     });
                 });
             },
@@ -91,7 +103,11 @@
                 var that = this
                 this.start = true
                 var s = parseInt(this.sec)
-                this.$axios.get('startStatistics',{t:s}).catch(e=>{
+                this.$axios.get('startStatistics',{
+                    params: {
+                        t:s
+                    }
+                }).catch(e=>{
                     alert(e)
                 })
                 console.log("that.getInfo()")
@@ -104,47 +120,49 @@
                 }
                 that.tid = setInterval(()=>{
                     //执行查询
-                    that.$axios.get('getStatisticsInfo',{watchMac: that.watchMac}).then(successReslut =>{
+                    console.log(that.watchMac)
+                    that.$axios.post('getStatisticsInfo',that.watchMac).then(successReslut =>{
                         let data = successReslut.data.all
                         that.displayInfo.splice(0,that.displayInfo.length)
                         var setf = new Set()
-                        for(var key in data){
-                            for (var key1 in frequencyNum){
-                                key1 = parseInt(key1)
-                                setf.add(key1)
-                            }
-                        }
-                        for(var key in data){
-                            var info = data[key]
-                            var dataNum = info['dataNum']
-                            var devMap = info['devMap']
-                            var frequencyNum = info['frequencyNum']
-                            var rssNum = info['rssNum']
-                            var uniqueDevMacNum = info['uniqueDevMacNum']
-                            var it = {
-                                apMac:key,
-                                dataNum:dataNum,
-                                rssNum:rssNum,
-                                uniqueDevMacNum:uniqueDevMacNum,
-                                rssMap:frequencyNum
-                            }
-                            for(var i in setf){
-                                if (frequencyNum[i]==undefined||frequencyNum[i]==null){
-                                    it[i] = 0
-                                }else {
-                                    it[i] = frequencyNum[i]
-                                }
-                            }
-                            console.log(it)
-                            that.displayInfo.push(it)
-                        }
-                        that.frequency.slice(0,that.frequency.length)
-                        for (var item in setf){
-                            that.frequency.push({
-                                label:item+"",
-                                prop:item+""
-                            })
-                        }
+                        console.log(data)
+                        // for(var key in data){
+                        //     for (var key1 in frequencyNum){
+                        //         key1 = parseInt(key1)
+                        //         setf.add(key1)
+                        //     }
+                        // }
+                        // for(var key in data){
+                        //     var info = data[key]
+                        //     var dataNum = info['dataNum']
+                        //     var devMap = info['devMap']
+                        //     var frequencyNum = info['frequencyNum']
+                        //     var rssNum = info['rssNum']
+                        //     var uniqueDevMacNum = info['uniqueDevMacNum']
+                        //     var it = {
+                        //         apMac:key,
+                        //         dataNum:dataNum,
+                        //         rssNum:rssNum,
+                        //         uniqueDevMacNum:uniqueDevMacNum,
+                        //         rssMap:frequencyNum
+                        //     }
+                        //     for(var i in setf){
+                        //         if (frequencyNum[i]==undefined||frequencyNum[i]==null){
+                        //             it[i] = 0
+                        //         }else {
+                        //             it[i] = frequencyNum[i]
+                        //         }
+                        //     }
+                        //     console.log(it)
+                        //     that.displayInfo.push(it)
+                        // }
+                        // that.frequency.slice(0,that.frequency.length)
+                        // for (var item in setf){
+                        //     that.frequency.push({
+                        //         label:item+"",
+                        //         prop:item+""
+                        //     })
+                        // }
 
                     }).catch(error=>{
                         that.$message.error(error)
@@ -168,9 +186,7 @@
 
         },
         beforeDestroy() {
-            if(this.tid) { //如果定时器还在运行 或者直接关闭，不用判断
-                clearInterval(this.tid); //关闭
-            }
+            this.stopStatistics()
         }
     }
 </script>

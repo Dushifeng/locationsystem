@@ -54,11 +54,15 @@ public class StatisticsService {
 
     public void stop(){
         DataDirectCenter.unregister(porter.name);
-        future.cancel(false);
-        future=null;
         lastSecondInfo.clear();
         statisticsInfo.clear();
         devWatchInfoMap.clear();
+        if (future==null){
+            return;
+        }
+        future.cancel(false);
+        future=null;
+
     }
 
     public SingleDevWatchInfo getSingleDevWatchInfo(String devMac){
