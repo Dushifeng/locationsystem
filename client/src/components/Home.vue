@@ -31,7 +31,7 @@
         <router-view></router-view>
       </el-main>
       <el-footer>
-        无线定位系统V3.0
+        地铁人流监测系统
       </el-footer>
   </el-container>
 </template>

@@ -18,7 +18,6 @@
                     </el-upload>
                   </template>
                 </el-input>
-
               </el-form-item>
               <el-form-item label="探针列表">
                 <el-input v-model="form.apName" disabled>

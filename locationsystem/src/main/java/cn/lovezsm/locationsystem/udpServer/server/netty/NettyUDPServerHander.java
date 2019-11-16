@@ -13,7 +13,9 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.socket.DatagramPacket;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 
 public class NettyUDPServerHander extends SimpleChannelInboundHandler<DatagramPacket> {
@@ -21,7 +23,6 @@ public class NettyUDPServerHander extends SimpleChannelInboundHandler<DatagramPa
     private DataCache cache;
     private LocationConfig config;
     private CollectionInfoCache collectionInfoCache;
-
     {
         cache = SpringUtils.getBean(DataCache.class);
         config = SpringUtils.getBean(LocationConfig.class);
@@ -32,9 +33,6 @@ public class NettyUDPServerHander extends SimpleChannelInboundHandler<DatagramPa
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, DatagramPacket datagramPacket) throws Exception {
         String rawData = ByteBufUtil.hexDump(datagramPacket.content());
         DataDirectCenter.putData(rawData);
-
-
-
     }
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) {

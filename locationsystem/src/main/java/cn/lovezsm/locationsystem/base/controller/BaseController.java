@@ -35,7 +35,6 @@ public class BaseController {
 
     @PostMapping("getStatisticsInfo")
     public Map<String, Object> getStatisticsInfo(@RequestBody ArrayList<String> devMacs){
-        System.out.println(devMacs);
         Map<String, StatisticsService.Info> data = statisticsService.getData();
         Map<String,Object> ans = new HashMap<>();
         ans.put("all",data);
@@ -45,6 +44,8 @@ public class BaseController {
                 continue;
             }
             SingleDevWatchInfo singleDevWatchInfo = statisticsService.getSingleDevWatchInfo(mac);
+            System.out.println(singleDevWatchInfo);
+
             if (singleDevWatchInfo!=null){
                 ans.put(mac,singleDevWatchInfo);
             }

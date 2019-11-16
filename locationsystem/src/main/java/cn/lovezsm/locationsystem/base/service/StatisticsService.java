@@ -66,6 +66,7 @@ public class StatisticsService {
     }
 
     public SingleDevWatchInfo getSingleDevWatchInfo(String devMac){
+        System.out.println(devWatchInfoMap);
         return devWatchInfoMap.get(devMac);
     }
 
@@ -110,14 +111,14 @@ public class StatisticsService {
     public static class Info{
         private AtomicInteger dataNum = new AtomicInteger(0);//数据包个数
         private Map<String,Integer>  devMap = new ConcurrentHashMap<>();
-        private Map<Integer,Integer> frequencyNum = new ConcurrentHashMap<>();
+        private Map<String,Integer> frequencyNum = new ConcurrentHashMap<>();
         private AtomicInteger rssNum = new AtomicInteger(0);//rss个数
 
         public void putFrequencyInfo(Integer frequency){
-            if (!frequencyNum.containsKey(frequency)){
-                frequencyNum.put(frequency,1);
+            if (!frequencyNum.containsKey(frequency+"")){
+                frequencyNum.put(frequency+"",1);
             }else {
-                frequencyNum.put(frequency,frequencyNum.get(frequency)+1);
+                frequencyNum.put(frequency+"",frequencyNum.get(frequency+"")+1);
             }
         }
 
@@ -149,7 +150,7 @@ public class StatisticsService {
             return rssNum.get();
         }
 
-        public Map<Integer, Integer> getFrequencyNum() {
+        public Map<String, Integer> getFrequencyNum() {
             return frequencyNum;
         }
 

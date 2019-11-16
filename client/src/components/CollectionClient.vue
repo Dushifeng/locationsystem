@@ -4,7 +4,6 @@
       <h4>
         {{notice}}
       </h4>
-
       <el-row>
         <el-form ref="form" v-model="info"  label-width="80px">
           <el-form-item label="本机Mac">
@@ -26,7 +25,6 @@
           <el-form-item label="y坐标">
             <el-input v-model="info.gridY" :disabled="start"></el-input>
           </el-form-item>
-
           <el-form-item label="开始">
             <el-switch
               v-model="start"
@@ -37,7 +35,6 @@
           </el-form-item>
         </el-form>
       </el-row>
-
       <el-row>
           <h1 align="center">
             {{seconds}}秒
