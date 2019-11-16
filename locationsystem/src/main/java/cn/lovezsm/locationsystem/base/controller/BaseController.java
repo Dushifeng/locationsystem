@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,6 +23,11 @@ public class BaseController {
 
     @Autowired
     StatisticsService statisticsService;
+
+    @RequestMapping("host")
+    public String host() throws UnknownHostException {
+        return InetAddress.getLocalHost().getHostAddress();
+    }
 
 
     @GetMapping("startStatistics")

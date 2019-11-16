@@ -27,7 +27,7 @@ import java.util.*;
 public class CollectionService {
 
     private List<NewTask> taskList = new ArrayList<>();
-    NewTask curNewTask;
+    volatile NewTask curNewTask;
     @Autowired
     CollectionInfoCache infoMap;
     @Autowired
@@ -38,6 +38,7 @@ public class CollectionService {
     }
 
     public boolean hasTask(){
+        System.out.println(curNewTask);
         return curNewTask!=null;
     }
     public Map<String,Dev> getDevMap(){

@@ -24,8 +24,6 @@ public class CollectionController {
     @Autowired
     CollectionService service;
 
-
-
     @GetMapping("login")
     public Result login(HttpServletResponse response,@CookieValue(value = "token" ,required = false) String token){
         Result result = new Result();

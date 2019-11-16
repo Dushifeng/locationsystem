@@ -23,7 +23,7 @@ public class CollectionInfoCache {
     private volatile Map<String, RegisterBean> map = new ConcurrentHashMap<>();
     private List<RegisterBean> finishedList = new CopyOnWriteArrayList<>();
     private BlockingQueue<Message> messageBlockingQueue = new LinkedBlockingQueue<>();
-    private NewTask task;
+    private volatile NewTask task;
     private static int threadNum = 10;
     private static ExecutorService threadPoolExecutor;
     private List<WriterContent> contentList = new CopyOnWriteArrayList<>();
@@ -43,6 +43,7 @@ public class CollectionInfoCache {
         for (int i = 0; i < threadNum; i++) {
             threadPoolExecutor.execute(new CollectionInfoWriter());
         }
+        System.out.println("startCollection、、、、、");
 
     }
     public void stopCollection(){
