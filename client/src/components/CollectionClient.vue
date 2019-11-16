@@ -1,6 +1,5 @@
 <template>
     <div>
-
       <h4>
         {{notice}}
       </h4>
@@ -129,6 +128,7 @@
             },
             getDevMapList(){
                 var that = this
+
                 this.$axios.get('collectionSys/getDevList').then(successResult =>{
                     if(successResult.data.status==200){
                         let devList = successResult.data.refObject;
@@ -144,7 +144,7 @@
                         that.$alert("当前无采集任务，请联系管理员")
                     }
                 }).catch(error => {
-
+                    that.notice = error
                     that.$alert("与服务器链接错误。请联系管理员  "+error)
                 })
             },
