@@ -4,6 +4,7 @@ package cn.lovezsm.locationsystem.locationSystem.algorithm;
 import cn.lovezsm.locationsystem.base.bean.*;
 import cn.lovezsm.locationsystem.base.config.APConfig;
 import cn.lovezsm.locationsystem.base.config.LocationConfig;
+import org.springframework.beans.factory.InitializingBean;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,7 +21,7 @@ import java.util.Map;
  *
  * 根据算法流程来重写这两个函数，其中locate给出了默认实现。
  */
-public abstract class LocationAlgorithm {
+public abstract class LocationAlgorithm implements InitializingBean {
     public int version = 1;
     public String algorithmName = "";
     public static double MIN_RSSI_VAL = -100;
@@ -138,5 +139,8 @@ public abstract class LocationAlgorithm {
         dd.setDeviceDensity(deviceDensity);
         dd.setNewDensity(newDensity);
         return dd;
+    }
+    public void afterPropertiesSet() throws Exception {
+        LocationConfig.locationAlgorithmMap.put(algorithmName,getClass());
     }
 }

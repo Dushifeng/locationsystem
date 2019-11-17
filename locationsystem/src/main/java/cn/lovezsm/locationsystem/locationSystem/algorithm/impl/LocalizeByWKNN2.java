@@ -65,4 +65,5 @@ public class LocalizeByWKNN2 extends LocationAlgorithm {
         result.setPos(new Pos(x,y));
         return result;
     }
+
 }

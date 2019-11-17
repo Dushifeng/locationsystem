@@ -15,12 +15,6 @@ import java.util.List;
 public class ApplicationStarter implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
-        List<Class> sonClass = ClassUtils.getSonClass(LocationAlgorithm.class);
-        for (Class clazz:sonClass){
-            Field algorithmName = clazz.getField("algorithmName");
-            String name = (String) algorithmName.get(clazz.getDeclaredConstructor().newInstance());
-            LocationConfig.locationAlgorithmMap.put(name,clazz);
-        }
         NettyUDPServer server = NettyUDPServer.getINSTANCE();
         server.start();
     }

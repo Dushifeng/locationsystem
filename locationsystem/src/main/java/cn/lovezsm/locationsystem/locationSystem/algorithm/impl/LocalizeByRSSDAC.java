@@ -8,6 +8,7 @@ import cn.lovezsm.locationsystem.base.bean.Pos;
 import cn.lovezsm.locationsystem.base.config.LocationConfig;
 import cn.lovezsm.locationsystem.base.util.AlgorithmUtils;
 import cn.lovezsm.locationsystem.locationSystem.algorithm.LocationAlgorithm;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
@@ -78,6 +79,5 @@ public class LocalizeByRSSDAC extends LocationAlgorithm {
         result.setPos(new Pos(x,y));
         return result;
     }
-
 
 }
