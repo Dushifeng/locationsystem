@@ -148,6 +148,7 @@ public class LocationSystemService {
 
     public void stopLocation(){
         DataDirectCenter.unregister(porter.name);
+
         try {
             scheduler.deleteJob(new JobKey("LocationTask"));
         } catch (SchedulerException e) {

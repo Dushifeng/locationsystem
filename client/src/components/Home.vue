@@ -10,15 +10,15 @@
         active-text-color="#ffd04b"
         router>
         <el-menu-item index="/">首页</el-menu-item>
-        <el-submenu index="2">
+        <el-submenu index="2" disabled>
           <template slot="title">采集系统</template>
           <el-menu-item index="collectionSysV1" disabled>version1</el-menu-item>
-          <el-menu-item index="collectionSysV2">version2</el-menu-item>
+          <el-menu-item index="collectionSysV2" disabled>version2</el-menu-item>
         </el-submenu>
-        <el-submenu index="3">
+        <el-submenu index="3" disabled>
           <template slot="title">定位系统</template>
-          <el-menu-item index="locationConfigPage">定位配置</el-menu-item>
-          <el-menu-item index="locationShowPage">定位展示</el-menu-item>
+          <el-menu-item index="locationConfigPage" disabled>定位配置</el-menu-item>
+          <el-menu-item index="locationShowPage" disabled>定位展示</el-menu-item>
         </el-submenu>
         <el-submenu index="4">
           <template slot="title" disabled="true">公共工具</template>
