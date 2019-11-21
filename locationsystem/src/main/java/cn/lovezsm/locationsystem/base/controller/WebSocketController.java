@@ -5,6 +5,8 @@ import cn.lovezsm.locationsystem.base.service.StatisticsService;
 import cn.lovezsm.locationsystem.base.util.DataParser;
 import cn.lovezsm.locationsystem.base.web.bean.SingleDevWatchInfo;
 
+import com.alibaba.fastjson.JSON;
+import jdk.nashorn.internal.parser.JSONParser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -82,7 +84,7 @@ public class WebSocketController {
                         ans.put(mac,singleDevWatchInfo);
                     }
                 }
-                sendObjMessage(ans);
+                sendTextMessage(JSON.toJSONString(ans));
         },1,1,TimeUnit.SECONDS);
     }
 
