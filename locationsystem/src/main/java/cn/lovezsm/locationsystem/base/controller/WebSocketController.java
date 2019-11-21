@@ -4,7 +4,7 @@ package cn.lovezsm.locationsystem.base.controller;
 import cn.lovezsm.locationsystem.base.service.StatisticsService;
 import cn.lovezsm.locationsystem.base.util.DataParser;
 import cn.lovezsm.locationsystem.base.web.bean.SingleDevWatchInfo;
-import com.alibaba.fastjson.JSON;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -14,9 +14,9 @@ import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
-import java.util.ArrayList;
+
 import java.util.HashMap;
-import java.util.List;
+
 import java.util.Map;
 import java.util.concurrent.*;
 
@@ -27,11 +27,16 @@ public class WebSocketController {
 
     private Session session;
 
+    private static StatisticsService statisticsService;
+
     @Autowired
-    StatisticsService statisticsService;
+    public  void setStatisticsService(StatisticsService statisticsService) {
+        WebSocketController.statisticsService = statisticsService;
+    }
+
     ScheduledFuture infoTask = null;
 
-    volatile List<String> devMacs = new ArrayList<>();
+    volatile ConcurrentHashMap<String,String> devMacs = new ConcurrentHashMap<>();
 
     private static ScheduledExecutorService poolExecutor = new ScheduledThreadPoolExecutor(1);
 
@@ -42,7 +47,8 @@ public class WebSocketController {
 
 
     public void stopStatistics(){
-        if (infoTask!=null||!infoTask.isCancelled()){
+
+        if (infoTask!=null&&!infoTask.isCancelled()){
             infoTask.cancel(true);
             infoTask = null;
         }
@@ -50,7 +56,8 @@ public class WebSocketController {
     }
 
     public void getStatisticsInfo(){
-        if (infoTask!=null||!infoTask.isCancelled()){
+
+        if (infoTask!=null&&!infoTask.isCancelled()){
             infoTask.cancel(false);
             infoTask = null;
         }
@@ -61,7 +68,8 @@ public class WebSocketController {
                 Map<String, StatisticsService.Info> data = statisticsService.getData();
                 Map<String,Object> ans = new HashMap<>();
                 ans.put("all",data);
-                for (String mac:devMacs){
+                for (Map.Entry<String,String> entry:devMacs.entrySet()){
+                    String mac = entry.getKey();
                     mac = DataParser.parseMac(mac);
                     if (mac==null){
                         continue;
@@ -84,6 +92,7 @@ public class WebSocketController {
     @OnOpen
     public void onOpen(Session session){
         this.session = session;
+        System.out.println(statisticsService);
         log.info("有新的WS连接。。。。");
     }
 
@@ -106,7 +115,7 @@ public class WebSocketController {
             stopStatistics();
         }else if (params[0].equals("addSingleDevWatch")){
             //#devMac
-            devMacs.add(params[1]);
+            devMacs.put(params[1],"");
         }else if(params[0].equals("removeWatchMac")){
             devMacs.remove(params[1]);
         }
