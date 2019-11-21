@@ -324,13 +324,12 @@
             },
             open: function () {
                 console.log("socket连接成功")
-                this.send("hello ws...")
             },
             error: function () {
                 console.log("连接错误")
             },
             getMessage: function (msg) {
-                console.log(msg)
+                msg = msg.data
                 let data = msg['all']
                 if(data == undefined||data == null){
                     return
