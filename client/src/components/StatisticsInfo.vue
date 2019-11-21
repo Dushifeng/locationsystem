@@ -138,16 +138,38 @@
                 tid:null,
                 watchMac:[
                 ],
-                watchMacTableData:{}
+                watchMacTableData:{},
+                socket:null,
+
             }
         },
+        mounted(){
+            this.init()
+        },
         methods:{
+            init:function(){
+                if(typeof(WebSocket) === "undefined"){
+                    alert("您的浏览器不支持socket")
+                }else{
+                    var path = "ws://"+window.location.host.split(":")[0]+":8081/ws/statistics"
+
+                    // 实例化socket
+                    this.socket = new WebSocket(path)
+                    // 监听socket连接
+                    this.socket.onopen = this.open
+                    // 监听socket错误信息
+                    this.socket.onerror = this.error
+                    // 监听socket消息
+                    this.socket.onmessage = this.getMessage
+                }
+            },
             goBack(){
                 console.log("back...")
             },
             removeWatchMac(mac){
                 var index = this.watchMac.indexOf(mac)
                 this.watchMac.splice(index,1)
+                this.send("removeWatchMac#"+mac)
             },
             confirmWatch(){
                 var that = this
@@ -161,7 +183,8 @@
                         return
                     }
                     that.watchMac.push(value)
-                    //添加card
+
+                    that.send("addSingleDevWatch#"+value)
                 }).catch((e) => {
                     this.$message({
                         type: 'info',
@@ -173,14 +196,8 @@
                 var that = this
                 this.start = true
                 var s = parseInt(this.sec)
-                this.$axios.get('startStatistics',{
-                    params: {
-                        t:s
-                    }
-                }).catch(e=>{
-                    alert(e)
-                })
-                that.getInfo(s)
+
+                this.send("startStatistics#"+s)
             },
 
             getInfo(n){
@@ -283,14 +300,8 @@
 
             stopStatistics(){
                 var that = this
-                if(this.tid) { //如果定时器还在运行 或者直接关闭，不用判断
-                    clearInterval(this.tid); //关闭
-                }
-                that.$axios.get('stopStatistics').catch(e=>{
-                    alert(e)
-                })
                 this.start = false
-
+                this.send("stopStatistics")
             },
             transMac(mac){
                 var ans = '';
@@ -311,11 +322,108 @@
                 }
                 return ans
             },
+            open: function () {
+                console.log("socket连接成功")
+                this.send("hello ws...")
+            },
+            error: function () {
+                console.log("连接错误")
+            },
+            getMessage: function (msg) {
+                console.log(msg)
+                let data = msg['all']
+                if(data == undefined||data == null){
+                    return
+                }
+                this.displayInfo.splice(0,this.displayInfo.length)
+                var setf = new Set()
+                for(var key in data){
+                    var frequencyNum = data[key]['frequencyNum']
+                    for (var key1 in frequencyNum){
+                        key1 = parseInt(key1)
+                        setf.add(key1)
+                    }
+                }
+                setf = Array.from(setf)
+                setf.sort((a,b)=>{ return a-b})
+                for(var key in data){
+                    var info = data[key]
+                    var dataNum = info['dataNum']
+                    var devMap = info['devMap']
+                    var frequencyNum = info['frequencyNum']
+                    var rssNum = info['rssNum']
+                    var uniqueDevMacNum = info['uniqueDevMacNum']
+                    var it = {
+                        apMac:key,
+                        dataNum:dataNum,
+                        rssNum:rssNum,
+                        uniqueDevMacNum:uniqueDevMacNum,
+                        rssMap:frequencyNum
+                    }
+                    for(let i of setf.values()){
+                        if (frequencyNum[i]==undefined||frequencyNum[i]==null){
+                            it[i] = 0
+                        }else {
+                            it[i] = frequencyNum[i]
+                        }
+                    }
 
+                    this.displayInfo.push(it)
+                }
+                this.frequency.splice(0,this.frequency.length)
+                for (let item of setf.values()){
+                    this.frequency.push({
+                        label:item+"",
+                        prop:item+""
+                    })
+                }
+                for (var i=0;i<this.watchMac.length;i++){
+                    var mac = this.watchMac[i]
+                    var info = msg.data[mac]
+                    if(info == undefined||info == null){
+                        continue
+                    }
+                    var rssAvgMap = []
+                    let rssMap = info['rssAvgMap']
+                    for(var apMac in rssMap){
+                        let rss = rssMap[apMac]
+                        rssAvgMap.push({
+                            apMac:apMac,
+                            rss:rss.rssi[0].toFixed(2)
+                        })
+                    }
+
+                    var messages = []
+                    let ms = info['messages']
+
+                    for(var i=0;i<ms.length;i++){
+                        var m = ms[i]
+                        var date = new Date(m['timestamp'])
+                        messages.push({
+                            apMac:m['apMac'],
+                            frequency: m['frequency'],
+                            rssi:m['rssi'].toFixed(2),
+                            timestamp:date.getHours()+":"+date.getMinutes()+":"+date.getSeconds()
+                        })
+                    }
+
+                    this.watchMacTableData[mac] = {
+                        rssAvgMap:rssAvgMap,
+                        messages:messages
+                    }
+                }
+            },
+            send: function (msg) {
+                this.socket.send(msg)
+            },
+            close: function () {
+                console.log("socket已经关闭")
+            }
 
         },
         beforeDestroy() {
             this.stopStatistics()
+            this.socket.onclose = this.close
         }
     }
 </script>
