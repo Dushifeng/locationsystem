@@ -48,7 +48,7 @@ public class WebSocketController {
 
     public void stopStatistics(){
 
-        if (infoTask!=null&&!infoTask.isCancelled()){
+        if (infoTask!=null||(infoTask!=null&&!infoTask.isCancelled())){
             infoTask.cancel(true);
             infoTask = null;
         }
@@ -56,18 +56,19 @@ public class WebSocketController {
     }
 
     public void getStatisticsInfo(){
-
-        if (infoTask!=null&&!infoTask.isCancelled()){
+        log.info("getStatisticsInfo----1");
+        if (infoTask!=null||(infoTask!=null&&!infoTask.isCancelled())){
             infoTask.cancel(false);
             infoTask = null;
         }
-
-        infoTask =poolExecutor.scheduleAtFixedRate(new Runnable() {
-            @Override
-            public void run() {
+        log.info("getStatisticsInfo----2");
+        infoTask =poolExecutor.scheduleAtFixedRate(()->{
                 Map<String, StatisticsService.Info> data = statisticsService.getData();
                 Map<String,Object> ans = new HashMap<>();
                 ans.put("all",data);
+
+                log.info("data:---"+data);
+
                 for (Map.Entry<String,String> entry:devMacs.entrySet()){
                     String mac = entry.getKey();
                     mac = DataParser.parseMac(mac);
@@ -82,11 +83,8 @@ public class WebSocketController {
                     }
                 }
                 sendObjMessage(ans);
-            }
         },1,1,TimeUnit.SECONDS);
-
     }
-
 
 
     @OnOpen
