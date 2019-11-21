@@ -155,6 +155,11 @@
                     confirmButtonText: '确定',
                     cancelButtonText: '取消',
                 }).then(({ value }) => {
+                    value = that.transMac(value)
+                    if (value == ''){
+                        that.$message.warning("输入的mac有误")
+                        return
+                    }
                     that.watchMac.push(value)
                     //添加card
                 }).catch((e) => {
@@ -286,7 +291,26 @@
                 })
                 this.start = false
 
-            }
+            },
+            transMac(mac){
+                var ans = '';
+                mac = mac.toLowerCase()
+                for (var i=0;i<mac.length;i++){
+                    if (mac[i]>='0'&&mac[i]<='9'){
+                        ans+=mac[i];
+                    }else if (mac[i]>='a'&&mac[i]<='z'){
+                        ans+=mac[i];
+                    }else if (mac[i]==':'||mac[i]=='-'){
+                        continue;
+                    }else {
+                        return '';
+                    }
+                }
+                if (ans.length != 12){
+                    return '';
+                }
+                return ans
+            },
 
 
         },
