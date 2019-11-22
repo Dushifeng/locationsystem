@@ -18,6 +18,7 @@ import javax.websocket.server.ServerEndpoint;
 
 import java.util.HashMap;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
 
@@ -27,15 +28,17 @@ import java.util.concurrent.*;
 public class WebSocketController {
 
     private Session session;
+    private static List<Session> sessionList = new CopyOnWriteArrayList<>();
 
     private static StatisticsService statisticsService;
+
+    private static ScheduledFuture infoTask = null;
 
     @Autowired
     public  void setStatisticsService(StatisticsService statisticsService) {
         WebSocketController.statisticsService = statisticsService;
     }
 
-    ScheduledFuture infoTask = null;
 
     volatile ConcurrentHashMap<String,String> devMacs = new ConcurrentHashMap<>();
 
@@ -46,17 +49,19 @@ public class WebSocketController {
         statisticsService.start(second);
     }
 
-
     public void stopStatistics(){
 
         if (infoTask!=null||(infoTask!=null&&!infoTask.isCancelled())){
             infoTask.cancel(true);
             infoTask = null;
         }
+
         statisticsService.stop();
+
     }
 
     public void getStatisticsInfo(){
+
         log.info("getStatisticsInfo----1");
         if (infoTask!=null||(infoTask!=null&&!infoTask.isCancelled())){
             infoTask.cancel(false);
@@ -87,19 +92,24 @@ public class WebSocketController {
         },1,1,TimeUnit.SECONDS);
     }
 
-
     @OnOpen
     public void onOpen(Session session){
         this.session = session;
         System.out.println(statisticsService);
         log.info("有新的WS连接。。。。");
+        sessionList.add(session);
 
+        Map<String,String> map = new HashMap<>();
+        map.put("hello","dsf");
+        map.put("heihei","zsm");
+        sendTextMessage(JSON.toJSONString(map));
     }
 
     @OnClose
     public void onClose() {
         log.info("【websocket消息】连接断开");
         stopStatistics();
+        sessionList.remove(session);
     }
 
     @OnMessage
@@ -123,24 +133,18 @@ public class WebSocketController {
 
     // 此为单点消息 (发送文本)
     public void sendTextMessage(String message) {
-        if (session != null) {
-            try {
-                session.getBasicRemote().sendText(message);
-            } catch (Exception e) {
-                e.printStackTrace();
+        for (Session session:sessionList){
+
+            if (session != null) {
+                try {
+                    session.getBasicRemote().sendText(message);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }
+
     }
 
-    // 此为单点消息 (发送对象)
-    public void sendObjMessage(Object message) {
-        if (session != null) {
-            try {
-                session.getAsyncRemote().sendObject(message);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
 
 }
