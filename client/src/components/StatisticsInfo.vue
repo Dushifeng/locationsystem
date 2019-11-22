@@ -11,7 +11,7 @@
       <el-button @click="stopStatistics">结束</el-button>
     </el-form-item>
   </el-form>
-  <div>
+  <div :class="{hide:getInfos}">
     <el-table
       :data="displayInfo"
       style="width: 100%"
@@ -44,7 +44,7 @@
         </template>
       </el-table-column>
     </el-table>
-  </div>
+  </div >
   <div>
     <el-button @click="confirmWatch">添加监控</el-button>
     <div>
@@ -140,7 +140,7 @@
                 ],
                 watchMacTableData:{},
                 socket:null,
-
+                getInfos:false
             }
         },
         mounted(){
@@ -162,6 +162,7 @@
                     // 监听socket消息
                     this.socket.onmessage = this.getMessage
                 }
+
             },
             goBack(){
                 console.log("back...")
@@ -210,16 +211,15 @@
                     that.$axios.post('getStatisticsInfo',that.watchMac).then(successReslut =>{
                         let data = successReslut.data['all']
                         that.displayInfo.splice(0,that.displayInfo.length)
-                        var setf = new Set()
                         for(var key in data){
                             var frequencyNum = data[key]['frequencyNum']
                             for (var key1 in frequencyNum){
                                 key1 = parseInt(key1)
-                                setf.add(key1)
+                                that.frequency.add(key1)
                             }
                         }
-                        setf = Array.from(setf)
-                        setf.sort((a,b)=>{ return a-b})
+                        that.frequency = Array.from(that.frequency)
+                        that.sort((a,b)=>{ return a-b})
                         for(var key in data){
                             var info = data[key]
                             var dataNum = info['dataNum']
@@ -330,13 +330,16 @@
             },
             getMessage: function (msg) {
                 msg = JSON.parse(msg.data)
-
                 let data = msg['all']
                 if(data == undefined||data == null){
                     return
                 }
-                this.displayInfo.splice(0,this.displayInfo.length)
                 var setf = new Set()
+
+                for(let i=0,len = this.frequency.length;i<len;i++){
+                    setf.add(parseInt(this.frequency[i].label))
+                }
+
                 for(var key in data){
                     var frequencyNum = data[key]['frequencyNum']
                     for (var key1 in frequencyNum){
@@ -346,6 +349,8 @@
                 }
                 setf = Array.from(setf)
                 setf.sort((a,b)=>{ return a-b})
+                var hideInfo = []
+
                 for(var key in data){
                     var info = data[key]
                     var dataNum = info['dataNum']
@@ -360,7 +365,7 @@
                         uniqueDevMacNum:uniqueDevMacNum,
                         rssMap:frequencyNum
                     }
-                    for(let i of setf.values()){
+                    for(var i in setf){
                         if (frequencyNum[i]==undefined||frequencyNum[i]==null){
                             it[i] = 0
                         }else {
@@ -368,16 +373,12 @@
                         }
                     }
 
-                    this.displayInfo.push(it)
+                    hideInfo.push(it)
                 }
-                this.frequency.splice(0,this.frequency.length)
-                for (let item of setf.values()){
-                    this.frequency.push({
-                        label:item+"",
-                        prop:item+""
-                    })
-                }
-                for (var i=0;i<this.watchMac.length;i++){
+
+
+
+                for (let i=0,len = this.watchMac.length;i<len;i++){
                     var mac = this.watchMac[i]
                     var info = msg[mac]
                     if(info == undefined||info == null){
@@ -396,8 +397,8 @@
                     var messages = []
                     let ms = info['messages']
 
-                    for(var i=0;i<ms.length;i++){
-                        var m = ms[i]
+                    for(let j=0,len=ms.length;j<len;j++){
+                        var m = ms[j]
                         var date = new Date(m['timestamp'])
                         messages.push({
                             apMac:m['apMac'],
@@ -412,6 +413,20 @@
                         messages:messages
                     }
                 }
+                this.getInfos = true
+
+                this.frequency.splice(0,this.frequency.length)
+                for (let i=0,len=setf.length;i<len;i++){
+                    this.frequency.push({
+                        label:setf[i]+"",
+                        prop:setf[i]+""
+                    })
+                }
+
+                this.displayInfo = hideInfo;
+
+                this.getInfos = false
+
             },
             send: function (msg) {
                 this.socket.send(msg)
@@ -429,5 +444,8 @@
 </script>
 
 <style scoped>
+  .hide{
+    opacity:0
+  }
 
 </style>
