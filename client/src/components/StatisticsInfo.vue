@@ -379,7 +379,7 @@
                 }
                 for (var i=0;i<this.watchMac.length;i++){
                     var mac = this.watchMac[i]
-                    var info = msg.data[mac]
+                    var info = msg[mac]
                     if(info == undefined||info == null){
                         continue
                     }
