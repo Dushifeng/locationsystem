@@ -329,7 +329,8 @@
                 console.log("连接错误")
             },
             getMessage: function (msg) {
-                msg = msg.data
+                msg = JSON.parse(msg.data)
+
                 let data = msg['all']
                 if(data == undefined||data == null){
                     return
