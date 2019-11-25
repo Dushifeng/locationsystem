@@ -5,6 +5,7 @@ import cn.lovezsm.locationsystem.base.bean.Message;
 import cn.lovezsm.locationsystem.base.config.APConfig;
 import cn.lovezsm.locationsystem.base.util.DataParser;
 import cn.lovezsm.locationsystem.base.web.bean.SingleDevWatchInfo;
+import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -37,6 +38,7 @@ public class StatisticsService {
     APConfig apConfig;
 
     public StatisticsService() {
+
     }
 
     public void start(int second){
@@ -102,7 +104,7 @@ public class StatisticsService {
                 watchInfo = devWatchInfoMap.get(message.getDevMac());
             }
 
-            watchInfo.getMessages().add(message);
+            watchInfo.addMessageNum(apMac,1);
             watchInfo.pushRss(message.getApMac(),message.getRssi());
         }
         lock.unlock();
@@ -175,6 +177,16 @@ public class StatisticsService {
             statisticsInfo.clear();
             devWatchInfoMap.clear();
             lock.unlock();
+        }
+    }
+    @Data
+    private class LastSecondInfo{
+        List<Message> messageList;
+        Map<String,Info> infoMap;
+
+        public LastSecondInfo(List<Message> messageList, Map<String, Info> infoMap) {
+            this.messageList = messageList;
+            this.infoMap = infoMap;
         }
     }
 

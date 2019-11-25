@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public class CollectionPorter extends Porter<String> {
+public class CollectionPorter extends Porter {
     @Autowired
     CollectionInfoCache cache;
 
@@ -23,8 +23,7 @@ public class CollectionPorter extends Porter<String> {
     }
 
     @Override
-    public void port(String rawData) {
-        List<Message> messages = DataParser.parseRawData(rawData);
+    public void port(List<Message> messages) {
         cache.putAll(messages);
     }
 }

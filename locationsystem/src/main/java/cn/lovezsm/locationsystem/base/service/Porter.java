@@ -4,7 +4,7 @@ import cn.lovezsm.locationsystem.base.bean.Message;
 
 import java.util.List;
 
-public abstract class Porter<T> {
+public abstract class Porter {
 
     public String name;
 
@@ -12,7 +12,7 @@ public abstract class Porter<T> {
         this.name = name;
     }
 
-    abstract void port(T messages);
+    abstract void port(List<Message> messages);
 
     public void register(){
         DataDirectCenter.register(this);

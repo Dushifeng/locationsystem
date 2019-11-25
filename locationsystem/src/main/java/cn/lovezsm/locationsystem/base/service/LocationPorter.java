@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public class LocationPorter extends Porter<String> {
+public class LocationPorter extends Porter {
 
     @Autowired
     private DataCache cache;
@@ -30,8 +30,7 @@ public class LocationPorter extends Porter<String> {
     }
 
     @Override
-    public void port(String rawData) {
-        List<Message> messages = DataParser.parseRawData(rawData);
+    public void port(List<Message> messages) {
         cache.addAll(messages,config.getSlidingStep()*1000);
     }
 }

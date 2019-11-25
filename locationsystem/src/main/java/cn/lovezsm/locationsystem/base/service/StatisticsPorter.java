@@ -1,18 +1,22 @@
 package cn.lovezsm.locationsystem.base.service;
 
+import cn.lovezsm.locationsystem.base.bean.Message;
+import cn.lovezsm.locationsystem.base.controller.StatisticsController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+
 @Component
-public class StatisticsPorter extends Porter<String>{
+public class StatisticsPorter extends Porter{
 
 
-
-    @Autowired
-    StatisticsService statisticsService;
+    List<StatisticsController> statisticsControllers = new CopyOnWriteArrayList<>();
 
     public StatisticsPorter() {
         super("StatisticsPorter");
+        DataDirectCenter.register(this);
     }
 
 
@@ -22,7 +26,17 @@ public class StatisticsPorter extends Porter<String>{
     }
 
     @Override
-    void port(String rawData) {
-        statisticsService.readData(rawData);
+    void port(List<Message> messages) {
+        for (StatisticsController controller:statisticsControllers) {
+            controller.read(messages);
+        }
+    }
+
+    public void registerController(StatisticsController controller){
+        statisticsControllers.add(controller);
+    }
+
+    public void unregisterController(StatisticsController controller){
+        statisticsControllers.remove(controller);
     }
 }

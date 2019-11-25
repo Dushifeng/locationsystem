@@ -140,6 +140,8 @@ public abstract class LocationAlgorithm implements InitializingBean {
         dd.setNewDensity(newDensity);
         return dd;
     }
+
+    @Override
     public void afterPropertiesSet() throws Exception {
         LocationConfig.locationAlgorithmMap.put(algorithmName,getClass());
     }

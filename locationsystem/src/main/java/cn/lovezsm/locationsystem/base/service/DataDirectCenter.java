@@ -1,6 +1,7 @@
 package cn.lovezsm.locationsystem.base.service;
 
 import cn.lovezsm.locationsystem.base.bean.Message;
+import cn.lovezsm.locationsystem.base.util.DataParser;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -15,7 +16,8 @@ public class DataDirectCenter {
 
     private  volatile static Map<String, Porter> porterMap = new ConcurrentHashMap<>();
 
-    static ExecutorService poolExecutor = Executors.newCachedThreadPool();
+    static ExecutorService poolExecutor = Executors.newScheduledThreadPool(1);
+
 
 
     public static void register(Porter porter){
@@ -35,9 +37,9 @@ public class DataDirectCenter {
     public static void putData(String rawData){
         for (Map.Entry<String,Porter> entry:porterMap.entrySet()) {
             Porter porter = entry.getValue();
-
+            List<Message> messages = DataParser.parseRawData(rawData);
             poolExecutor.execute(()->{
-               porter.port(rawData);
+               porter.port(messages);
             });
         }
     }

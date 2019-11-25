@@ -43,9 +43,12 @@ public class LocationTask extends QuartzJobBean {
         //2.获得计算数据
         List<Message> data = dataCache.getAll();
         data = DataParser.messageFilter(messageConfig,apConfig, data);
+
         if (data.size()==0){
             return;
         }
+
+
         String locationAlgorithmName = locationConfig.getLocationAlgorithmName();
         LocationAlgorithm algorithm = null;
         try {

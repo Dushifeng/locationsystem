@@ -15,26 +15,33 @@
     <el-table
       :data="displayInfo"
       style="width: 100%"
+      :summary-method="getSummaries"
+      show-summary
       max-height="400px">
       <el-table-column
         prop="apMac"
-        label="AP Mac"
+        label="AP MAC"
         width="150">
       </el-table-column>
       <el-table-column label="基础信息">
         <el-table-column
           prop="dataNum"
-          label="数据包数"
-          width="80">
+          label="UDP接收数据包数"
+          width="180">
         </el-table-column>
         <el-table-column
           prop="rssNum"
-          label="有效信息数"
+          label="rss数目"
           width="100">
+        </el-table-column>
+        <el-table-column
+          prop="uniqueDevMacNum"
+          label="探测到的设备数"
+          width="150">
         </el-table-column>
       </el-table-column>
 
-      <el-table-column label="信道号统计">
+      <el-table-column label="不同信道上的rss数目">
         <template v-for="item in frequency">
           <el-table-column
             :label="item.label"
@@ -48,8 +55,8 @@
   <div>
     <el-button @click="confirmWatch">添加监控</el-button>
     <div>
+      <template v-for="mac in watchMac">
       <el-row :gutter="10">
-        <template v-for="mac in watchMac">
           <el-col :span="12">
             <el-card shadow="always">
 <!--设备mac，记录数（table），被探测到ap的平均值（table）-->
@@ -57,67 +64,38 @@
                 <h3>{{mac}}</h3>
               </div>
               <div>
-                <el-row :gutter="60">
-                  <el-col :span="6">
-                    <template v-if="watchMacTableData[mac] != undefined">
-                      <h3>均值信息</h3>
-                      <el-table
-                        :data="watchMacTableData[mac].rssAvgMap"
-                        style="width: 100%">
-                        <el-table-column
-                          prop="apMac"
-                          label="AP-Mac"
-                          width="120">
-                        </el-table-column>
-                        <el-table-column
-                          prop="rss"
-                          label="Rss值"
-                          width="80">
-                        </el-table-column>
-                      </el-table>
-                    </template>
-                  </el-col>
-                  <el-col :span="12" :offset="6">
-                      <template v-if="watchMacTableData[mac] != undefined">
-                        <h3>被嗅探到的记录 <span>{{watchMacTableData[mac].messages.length}} 条</span></h3>
-                        <el-table
-                          :data="watchMacTableData[mac].messages"
-                          style="width: 100%;"
-                          max-height="300"
-                        >
-                          <el-table-column
-                            prop="apMac"
-                            label="AP-Mac"
-                            width="140">
-                          </el-table-column>
-                          <el-table-column
-                            prop="frequency"
-                            label="信道号"
-                            width="80">
-                          </el-table-column>
-                          <el-table-column
-                            prop="rssi"
-                            label="rss值"
-                            width="80">
-                          </el-table-column>
-                          <el-table-column
-                            prop="timestamp"
-                            label="探测时间"
-                            width="150">
-                          </el-table-column>
-                        </el-table>
-                      </template>
-                  </el-col>
-                </el-row>
+                  <template v-if="watchMacTableData[mac] != undefined">
+                    <h3>均值及扫描次数信息</h3>
+                    <el-table
+                      :data="watchMacTableData[mac]"
+                      show-summary
+                      :summary-method="getSummariesByMac"
+                      style="width: 100%">
+                      <el-table-column
+                        prop="apMac"
+                        label="AP-Mac"
+                        width="120">
+                      </el-table-column>
+                      <el-table-column
+                        prop="rss"
+                        label="Rss值"
+                        width="180">
+                      </el-table-column>
+                      <el-table-column
+                        prop="num"
+                        label="被扫描到的次数"
+                        width="180">
+                      </el-table-column>
+                    </el-table>
+                  </template>
                 <div>
                   <el-button @click="removeWatchMac(mac)">删除</el-button>
                 </div>
               </div>
             </el-card>
           </el-col>
-        </template>
       </el-row>
-
+      </template>
     </div>
   </div>
 </div>
@@ -140,7 +118,8 @@
                 ],
                 watchMacTableData:{},
                 socket:null,
-                getInfos:false
+                getInfos:false,
+                allUniqueDevMacNum:0
             }
         },
         mounted(){
@@ -200,104 +179,6 @@
 
                 this.send("startStatistics#"+s)
             },
-
-            getInfo(n){
-                var that = this
-                if (that.tid!=null){
-                    clearInterval(that.tid)
-                }
-                that.tid = setInterval(()=>{
-                    //执行查询
-                    that.$axios.post('getStatisticsInfo',that.watchMac).then(successReslut =>{
-                        let data = successReslut.data['all']
-                        that.displayInfo.splice(0,that.displayInfo.length)
-                        for(var key in data){
-                            var frequencyNum = data[key]['frequencyNum']
-                            for (var key1 in frequencyNum){
-                                key1 = parseInt(key1)
-                                that.frequency.add(key1)
-                            }
-                        }
-                        that.frequency = Array.from(that.frequency)
-                        that.sort((a,b)=>{ return a-b})
-                        for(var key in data){
-                            var info = data[key]
-                            var dataNum = info['dataNum']
-                            var devMap = info['devMap']
-                            var frequencyNum = info['frequencyNum']
-                            var rssNum = info['rssNum']
-                            var uniqueDevMacNum = info['uniqueDevMacNum']
-                            var it = {
-                                apMac:key,
-                                dataNum:dataNum,
-                                rssNum:rssNum,
-                                uniqueDevMacNum:uniqueDevMacNum,
-                                rssMap:frequencyNum
-                            }
-                            for(let i of setf.values()){
-                                if (frequencyNum[i]==undefined||frequencyNum[i]==null){
-                                    it[i] = 0
-                                }else {
-                                    it[i] = frequencyNum[i]
-                                }
-                            }
-
-                            that.displayInfo.push(it)
-                        }
-                        that.frequency.splice(0,that.frequency.length)
-                        for (let item of setf.values()){
-                            that.frequency.push({
-                                label:item+"",
-                                prop:item+""
-                            })
-                        }
-                        console.log(that.watchMac)
-                        for (var i=0;i<that.watchMac.length;i++){
-                            var mac = that.watchMac[i]
-                            console.log(mac)
-                            var info = successReslut.data[mac]
-                            console.log(info)
-                            if(info == undefined||info == null){
-                                continue
-                            }
-                            var rssAvgMap = []
-                            let rssMap = info['rssAvgMap']
-                            for(var apMac in rssMap){
-                                let rss = rssMap[apMac]
-                                rssAvgMap.push({
-                                    apMac:apMac,
-                                    rss:rss.rssi[0].toFixed(2)
-                                })
-                            }
-
-                            var messages = []
-                            let ms = info['messages']
-
-                            for(var i=0;i<ms.length;i++){
-                                var m = ms[i]
-                                var date = new Date(m['timestamp'])
-                                messages.push({
-                                    apMac:m['apMac'],
-                                    frequency: m['frequency'],
-                                    rssi:m['rssi'].toFixed(2),
-                                    timestamp:date.getHours()+":"+date.getMinutes()+":"+date.getSeconds()
-                                })
-                            }
-
-                            that.watchMacTableData[mac] = {
-                                rssAvgMap:rssAvgMap,
-                                messages:messages
-                            }
-                            console.log(that.watchMacTableData)
-                        }
-
-                    }).catch(error=>{
-                        that.$message.error(error)
-                    })
-                },n*1000)
-            },
-
-
             stopStatistics(){
                 var that = this
                 this.start = false
@@ -322,6 +203,67 @@
                 }
                 return ans
             },
+
+            getSummaries(param) {
+                const { columns, data } = param;
+                const sums = [];
+                columns.forEach((column, index) => {
+                    if (index === 0) {
+                        sums[index] = '总数';
+                        return;
+                    }
+                    if (index === 3){
+                        sums[index] = this.allUniqueDevMacNum;
+                        return;
+                    }
+                    const values = data.map(item => Number(item[column.property]));
+                    if (!values.every(value => isNaN(value))) {
+                        sums[index] = values.reduce((prev, curr) => {
+                            const value = Number(curr);
+                            if (!isNaN(value)) {
+                                return prev + curr;
+                            } else {
+                                return prev;
+                            }
+                        }, 0);
+                    } else {
+                        sums[index] = 'N/A';
+                    }
+                });
+
+                return sums;
+            },
+
+
+            getSummariesByMac(param){
+                const { columns, data } = param;
+                const sums = [];
+                columns.forEach((column, index) => {
+                    if (index === 0) {
+                        sums[index] = '总数';
+                        return;
+                    }
+                    if (index === 1){
+                        sums[index] = '';
+                        return;
+                    }
+                    const values = data.map(item => Number(item[column.property]));
+                    if (!values.every(value => isNaN(value))) {
+                        sums[index] = values.reduce((prev, curr) => {
+                            const value = Number(curr);
+                            if (!isNaN(value)) {
+                                return prev + curr;
+                            } else {
+                                return prev;
+                            }
+                        }, 0);
+                    } else {
+                        sums[index] = 'N/A';
+                    }
+                });
+
+                return sums;
+            },
             open: function () {
                 console.log("socket连接成功")
             },
@@ -331,52 +273,63 @@
             getMessage: function (msg) {
                 msg = JSON.parse(msg.data)
                 let data = msg['all']
-                if(data == undefined||data == null){
-                    return
-                }
-                var setf = new Set()
+                if(data != undefined&&data != null){
+                    this.allUniqueDevMacNum = msg['devMacNum']
+                    var setf = new Set()
 
-                for(let i=0,len = this.frequency.length;i<len;i++){
-                    setf.add(parseInt(this.frequency[i].label))
-                }
-
-                for(var key in data){
-                    var frequencyNum = data[key]['frequencyNum']
-                    for (var key1 in frequencyNum){
-                        key1 = parseInt(key1)
-                        setf.add(key1)
+                    for(let i=0,len = this.frequency.length;i<len;i++){
+                        setf.add(parseInt(this.frequency[i].label))
                     }
-                }
-                setf = Array.from(setf)
-                setf.sort((a,b)=>{ return a-b})
-                var hideInfo = []
 
-                for(var key in data){
-                    var info = data[key]
-                    var dataNum = info['dataNum']
-                    var devMap = info['devMap']
-                    var frequencyNum = info['frequencyNum']
-                    var rssNum = info['rssNum']
-                    var uniqueDevMacNum = info['uniqueDevMacNum']
-                    var it = {
-                        apMac:key,
-                        dataNum:dataNum,
-                        rssNum:rssNum,
-                        uniqueDevMacNum:uniqueDevMacNum,
-                        rssMap:frequencyNum
-                    }
-                    for(var i in setf){
-                        if (frequencyNum[i]==undefined||frequencyNum[i]==null){
-                            it[i] = 0
-                        }else {
-                            it[i] = frequencyNum[i]
+                    for(var key in data){
+                        var frequencyNum = data[key]['frequencyNum']
+                        for (var key1 in frequencyNum){
+                            key1 = parseInt(key1)
+                            setf.add(key1)
                         }
                     }
+                    setf = Array.from(setf)
+                    setf.sort((a,b)=>{ return a-b})
+                    var hideInfo = []
 
-                    hideInfo.push(it)
+                    for(var key in data){
+                        var info = data[key]
+                        var dataNum = info['dataNum']
+                        var devMap = info['devMap']
+                        var frequencyNum = info['frequencyNum']
+                        var rssNum = info['rssNum']
+                        var uniqueDevMacNum = info['uniqueDevMacNum']
+                        var it = {
+                            apMac:key,
+                            dataNum:dataNum,
+                            rssNum:rssNum,
+                            uniqueDevMacNum:uniqueDevMacNum,
+                            rssMap:frequencyNum
+                        }
+                        for(let i = 0,len = setf.length;i<len;i++){
+                            let ft = setf[i]
+                            if (frequencyNum[ft]==undefined||frequencyNum[ft]==null){
+                                it[ft] = 0
+                            }else {
+                                it[ft] = frequencyNum[ft]
+                            }
+                        }
+
+                        hideInfo.push(it)
+                    }
+                    this.getInfos = true
+
+                    this.frequency.splice(0,this.frequency.length)
+                    for (let i=0,len=setf.length;i<len;i++){
+                        this.frequency.push({
+                            label:setf[i]+"",
+                            prop:setf[i]+""
+                        })
+                    }
+
+                    this.displayInfo = hideInfo;
+                    this.getInfos = false
                 }
-
-
 
                 for (let i=0,len = this.watchMac.length;i<len;i++){
                     var mac = this.watchMac[i]
@@ -384,50 +337,22 @@
                     if(info == undefined||info == null){
                         continue
                     }
-                    var rssAvgMap = []
                     let rssMap = info['rssAvgMap']
+                    let ms = info['messageNumMap']
+                    this.watchMacTableData[mac] = []
                     for(var apMac in rssMap){
                         let rss = rssMap[apMac]
-                        rssAvgMap.push({
+                        var num = ms[apMac]
+                        this.watchMacTableData[mac].push({
                             apMac:apMac,
-                            rss:rss.rssi[0].toFixed(2)
+                            rss:rss.rssi[0].toFixed(2),
+                            num:num
                         })
                     }
-
-                    var messages = []
-                    let ms = info['messages']
-
-                    for(let j=0,len=ms.length;j<len;j++){
-                        var m = ms[j]
-                        var date = new Date(m['timestamp'])
-                        messages.push({
-                            apMac:m['apMac'],
-                            frequency: m['frequency'],
-                            rssi:m['rssi'].toFixed(2),
-                            timestamp:date.getHours()+":"+date.getMinutes()+":"+date.getSeconds()
-                        })
-                    }
-
-                    this.watchMacTableData[mac] = {
-                        rssAvgMap:rssAvgMap,
-                        messages:messages
-                    }
                 }
-                this.getInfos = true
-
-                this.frequency.splice(0,this.frequency.length)
-                for (let i=0,len=setf.length;i<len;i++){
-                    this.frequency.push({
-                        label:setf[i]+"",
-                        prop:setf[i]+""
-                    })
-                }
-
-                this.displayInfo = hideInfo;
-
-                this.getInfos = false
 
             },
+
             send: function (msg) {
                 this.socket.send(msg)
             },
