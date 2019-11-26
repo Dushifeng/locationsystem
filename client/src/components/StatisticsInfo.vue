@@ -162,6 +162,10 @@
                         that.$message.warning("输入的mac有误")
                         return
                     }
+                    if(that.watchMac.indexOf(value)!=-1){
+                        that.$message.warning("输入的mac已经存在")
+                        return;
+                    }
                     that.watchMac.push(value)
 
                     that.send("addSingleDevWatch#"+value)
