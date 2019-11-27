@@ -13,7 +13,7 @@
         <canvas id="c"></canvas>
       </div>
     </el-row>
-    <el-row>
+    <el-row style="margin-top: 10px">
       <el-col :span="4">
         <el-card class="box-card">
           <el-form ref="form" :model="option1" label-width="80px">
@@ -145,6 +145,7 @@
                 right:0.0,
                 top:0.0,
                 buttom:0.0,
+
                 k:1,
                 x:[],
                 y:[],
@@ -216,8 +217,8 @@
             var num = 0;
             for (var devMac in locPoint){
               num++;
-              var x = locPoint[devMac].pos.x
-              var y = locPoint[devMac].pos.y
+              var x = locPoint[devMac].pos.x-that.gridMap.left
+              var y = locPoint[devMac].pos.y-that.gridMap.top
               //过滤Mac
               let color = 'red'
               let contain = false
@@ -299,9 +300,9 @@
                 }
                 that.gridMap.x = gridmap.x;
                 that.gridMap.y = gridmap.y;
-               let a = that.canvasParams.width/(that.gridMap.right-that.gridMap.left)
-               let b = that.canvasParams.height/(that.gridMap.buttom-that.gridMap.top)
-               that.gridMap.k = a>b?b:a;a
+               let a = (that.canvasParams.width-10)/(that.gridMap.right-that.gridMap.left)
+               let b = (that.canvasParams.height-10)/(that.gridMap.buttom-that.gridMap.top)
+               that.gridMap.k = a>b?b:a;
                let k = that.gridMap.k
                var GridRect = fabric.util.createClass(fabric.Rect,{
                 type:'GridRect',
@@ -327,8 +328,8 @@
                 }
               })
                for (var i = 0;i<gridmap.gridNum;i++){
-                  let left = (gridmap.x[i]-gridmap.width[i]/2)*k;
-                  let top = (gridmap.y[i] - gridmap.height[i]/2)*k;
+                  let left = (gridmap.x[i]-gridmap.width[i]/2-that.gridMap.left)*k;
+                  let top = (gridmap.y[i] - gridmap.height[i]/2-that.gridMap.top)*k;
                   let width = (gridmap.width[i])*k;
                   let height = (gridmap.height[i])*k;
 
