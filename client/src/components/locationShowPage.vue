@@ -217,8 +217,8 @@
             var num = 0;
             for (var devMac in locPoint){
               num++;
-              var x = locPoint[devMac].pos.x-that.gridMap.left
-              var y = locPoint[devMac].pos.y-that.gridMap.top
+              var x = locPoint[devMac].pos.x-self.gridMap.left
+              var y = locPoint[devMac].pos.y-self.gridMap.top
               //过滤Mac
               let color = 'red'
               let contain = false
