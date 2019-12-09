@@ -106,7 +106,7 @@ public class CollectionInfoCache {
                             registerBean.getResult().add5GNum();
                         }
 
-                        WriterContent content = new WriterContent(message.getTimestamp()
+                        WriterContent content = new WriterContent(message.getTimestamp().getTime()
                                 ,message.getApMac(),message.getDevMac(),
                                 registerBean.getGridmapIndex(),apConfig.getAPIndex(message.getApMac()),message.getFrequency(),message.getRssi());
 

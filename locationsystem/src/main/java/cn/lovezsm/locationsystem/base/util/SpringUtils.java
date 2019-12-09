@@ -37,4 +37,8 @@ public class SpringUtils implements ApplicationContextAware {
         return getApplicationContext().getBean(name, clazz);
     }
 
+    public static boolean isExist(String name){
+        return getApplicationContext().containsBean(name);
+    }
+
 }

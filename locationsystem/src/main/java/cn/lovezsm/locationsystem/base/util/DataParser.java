@@ -5,7 +5,9 @@ import cn.lovezsm.locationsystem.base.bean.Message;
 import cn.lovezsm.locationsystem.base.config.APConfig;
 import cn.lovezsm.locationsystem.base.config.MessageConfig;
 
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class DataParser {
@@ -14,7 +16,7 @@ public class DataParser {
             return null;
         }
         if(timeStamp == null){
-            timeStamp = System.currentTimeMillis();
+            timeStamp = Instant.now().toEpochMilli();
         }
         List<Message> messages = new ArrayList<>();
 
@@ -34,7 +36,7 @@ public class DataParser {
             index += 32;
             int rssi = Integer.parseInt(rawData.substring(index, index + 2), 16) - 256;
             index += 2;
-            Message message = new Message(devMac,frequency,rssi,apMac,timeStamp);
+            Message message = new Message(devMac,frequency,rssi,apMac,new Date(timeStamp));
             messages.add(message);
         }
 
