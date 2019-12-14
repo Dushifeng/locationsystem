@@ -8,6 +8,7 @@ import LocationConfigPage from "../components/LocationConfigPage";
 import CollectionClient from "../components/CollectionClient";
 import CollectionConfig from "../components/CollectionSysV2";
 import StatisticsInfo from "../components/StatisticsInfo";
+import SearchMessage from "../components/SearchMessage";
 Vue.use(Router)
 
 export default new Router({
@@ -41,6 +42,10 @@ export default new Router({
         {
           path:'/statisticsInfo',
           component:StatisticsInfo
+        },
+        {
+          path:'/searchMessage',
+          component:SearchMessage
         }
 
       ]

@@ -23,6 +23,7 @@
         <el-submenu index="4">
           <template slot="title">公共工具</template>
           <el-menu-item index="statisticsInfo">统计信息</el-menu-item>
+          <el-menu-item index="searchMessage">数据库记录查询</el-menu-item>
           <el-menu-item index="simulationShowPage" disabled>生成晶格文件</el-menu-item>
         </el-submenu>
         </el-menu>
