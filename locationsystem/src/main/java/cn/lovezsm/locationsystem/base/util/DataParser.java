@@ -22,22 +22,26 @@ public class DataParser {
 
         String apMac = rawData.substring(46,58);
         int index = 58;
-        while (index < rawData.length()-1){
-            String tag = rawData.substring(index, index + 2);
-            if (!tag.equals("00")) {
-                int len = Integer.parseInt(rawData.substring(index + 2, index + 6), 16);
-                index += (len * 2 + 6);
-                System.out.println("出现了一条异常信息:"+tag);
-                continue;
+        try {
+            while (index < rawData.length()-1){
+                String tag = rawData.substring(index, index + 2);
+                if (!tag.equals("00")) {
+                    int len = Integer.parseInt(rawData.substring(index + 2, index + 6), 16);
+                    index += (len * 2 + 6);
+                    System.out.println("出现了一条异常信息:"+tag);
+                    continue;
+                }
+                index += 6;
+                String devMac = rawData.substring(index, index + 12);
+                int frequency = Integer.parseInt(rawData.substring(index + 16, index + 18), 16);
+                index += 32;
+                int rssi = Integer.parseInt(rawData.substring(index, index + 2), 16) - 256;
+                index += 2;
+                Message message = new Message(devMac,frequency,rssi,apMac,new Date(timeStamp));
+                messages.add(message);
             }
-            index += 6;
-            String devMac = rawData.substring(index, index + 12);
-            int frequency = Integer.parseInt(rawData.substring(index + 16, index + 18), 16);
-            index += 32;
-            int rssi = Integer.parseInt(rawData.substring(index, index + 2), 16) - 256;
-            index += 2;
-            Message message = new Message(devMac,frequency,rssi,apMac,new Date(timeStamp));
-            messages.add(message);
+        }catch (Exception e){
+            e.printStackTrace();
         }
 
         return messages;

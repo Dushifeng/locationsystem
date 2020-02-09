@@ -9,7 +9,6 @@ import org.springframework.jdbc.datasource.init.DatabasePopulator;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 
 import javax.sql.DataSource;
-@Configuration
 public class CustomizeDataSourceInitializer {
     @Value("classpath:data.sql")
     private Resource functionScript;

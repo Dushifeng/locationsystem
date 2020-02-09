@@ -14,9 +14,9 @@ var axios = require('axios')
 let protocol = window.location.protocol; //协议
 let host = window.location.host.split(":")[0]; //主机
 
-console.log(protocol + "//" + host  +":8081")
+console.log(protocol + "//" + host  +":8080")
 
-axios.defaults.baseURL = protocol + "//" + host  +":8081/api";
+axios.defaults.baseURL = protocol + "//" + host  +":8080/api";
 
 axios.defaults.withCredentials = true
 axios.defaults.changeOrigin = true

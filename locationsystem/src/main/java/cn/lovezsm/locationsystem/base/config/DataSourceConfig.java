@@ -12,8 +12,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
 
-@Configuration
-@Primary //在同样的DataSource中，首先使用被标注的DataSource
+//@Configuration
+//@Primary //在同样的DataSource中，首先使用被标注的DataSource
 @Slf4j
 public class DataSourceConfig {
 

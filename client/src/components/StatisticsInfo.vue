@@ -130,7 +130,7 @@
                 if(typeof(WebSocket) === "undefined"){
                     alert("您的浏览器不支持socket")
                 }else{
-                    var path = "ws://"+window.location.host.split(":")[0]+":8081/ws/statistics"
+                    var path = "ws://"+window.location.host.split(":")[0]+":8080/ws/statistics"
 
                     // 实例化socket
                     this.socket = new WebSocket(path)

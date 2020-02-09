@@ -1,9 +1,14 @@
 package cn.lovezsm.locationsystem.base.data;
 
+import cn.lovezsm.locationsystem.base.bean.LocationResult;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.PriorityQueue;
@@ -35,7 +40,32 @@ public class LocationResultCache {
                 new SwapExpiredNodeWork(), 1, 1, TimeUnit.SECONDS);
     }
 
+    BufferedWriter writer;
+
+    {
+        File file = new File("guiji-w.txt");
+        if (file.exists()){
+            file.delete();
+        }
+
+        try {
+            writer = new BufferedWriter(new FileWriter("guiji-w.txt",true));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public Object set(String key, Object value, long ttl) {
+
+        LocationResult result = (LocationResult) value;
+        String line = result.getLocationTime()+","+result.getDevMac()+","+result.getPos().getX()+","+result.getPos().getY();
+        try {
+            writer.write(line);
+            writer.newLine();
+            writer.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         Assert.isTrue(StringUtils.hasLength(key), "key can't be empty");
         Assert.isTrue(ttl > 0, "ttl must greater than 0");

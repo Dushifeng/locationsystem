@@ -34,7 +34,7 @@ module.exports = {
     assetsPublicPath: '/',
     proxyTable: {
       '/api': {
-        target: getNetworkIp()+':8081',
+        target: getNetworkIp()+':8080',
         changeOrigin: true,
         credentials:true,
         pathRewrite: {

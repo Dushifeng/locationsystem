@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
@@ -35,9 +36,11 @@ public class LocationTask extends QuartzJobBean {
         //1.读取配置参数
         LocationConfig locationConfig = SpringUtils.getBean(LocationConfig.class);
         APConfig apConfig = SpringUtils.getBean(APConfig.class);
+
         MessageConfig messageConfig = SpringUtils.getBean(MessageConfig.class);
         FingerPrint fingerPrint = SpringUtils.getBean(FingerPrint.class);
         GridMap gridMap = SpringUtils.getBean(GridMap.class);
+
         DataCache dataCache = SpringUtils.getBean(DataCache.class);
 
         //2.获得计算数据

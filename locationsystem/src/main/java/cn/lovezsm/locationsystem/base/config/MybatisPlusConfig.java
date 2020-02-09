@@ -18,7 +18,6 @@ import org.springframework.util.StringUtils;
 
 import javax.sql.DataSource;
 
-@Configuration
 public class MybatisPlusConfig {
     @Autowired
     private DataSource dataSource;
