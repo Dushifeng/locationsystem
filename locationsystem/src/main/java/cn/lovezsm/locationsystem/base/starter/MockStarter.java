@@ -37,9 +37,10 @@ public class MockStarter implements CommandLineRunner {
 
     @Override
     public void run(String... args)  {
+        String name = "三人-一人定点";
         service.submit(()->{
             try {
-                File rawFile = new File("C:\\Users\\61616\\Desktop\\实验数据\\双人.txt");
+                File rawFile = new File("C:\\Users\\61616\\Desktop\\实验数据\\"+name+".txt");
                 LocationConfig locationConfig = SpringUtils.getBean(LocationConfig.class);
 
                 FingerPrint fingerPrint = FingerPrintBuilder.build("",
@@ -60,19 +61,23 @@ public class MockStarter implements CommandLineRunner {
 
                 Map<Integer, List<Item>> map = transform(data);
 
-                BufferedWriter writer = new BufferedWriter(new FileWriter(new File("two-wifi-loc.txt")));
+                BufferedWriter writer = new BufferedWriter(new FileWriter(new File(name+".txt")));
                 for (Map.Entry<Integer,List<Item>> entry:map.entrySet()){
-
-                    
 
                     List<Item> value = entry.getValue();
                     Collections.sort(value,Comparator.comparingLong(i->i.ts));
 
                     List<Message> ldata = new ArrayList<>();
-                    for (Item item:value){
-                        List<Message> messages = DataParser.parseRawData(item.ts,item.data);
-                        ldata.addAll(messages);
+                    try {
+                        for (Item item:value){
+                            System.out.println(item);
+                            List<Message> messages = DataParser.parseRawData(item.ts,item.data);
+                            ldata.addAll(messages);
+                        }
+                    }catch (Exception e){
+                        e.printStackTrace();
                     }
+
 
                     //3.装填算法参数
                     Map<String,Object> locationParams = new HashMap<>();
